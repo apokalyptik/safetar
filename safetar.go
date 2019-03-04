@@ -27,15 +27,19 @@ func main() {
 	flag.StringVar(&tempDir, "temp-dir", tempDir, "Path to where temp files should be written (otherwise cwd is used)")
 	flag.Parse()
 	input := tar.NewReader(os.Stdin)
+	count := 0
 	for {
 		header, err := input.Next()
 		if err != nil {
 			if err == io.EOF {
+				if count == 0 {
+					os.Stdout.Write(make([]byte, 10240))
+				}
 				break
 			}
 			log.Fatal(err)
 		}
-
+		count++
 		buffer, err := ioutil.TempFile(tempDir, ".safetar.buffer")
 		if err != nil {
 			fatalTarErr(header, "temp-file-create", err)
